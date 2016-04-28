@@ -1,0 +1,5 @@
+1920 1080
+E:\HEVC_yuv\sc_desktop_1920x1080_60_8bit_rgb.rgb
+efg
+hig
+ksdf
