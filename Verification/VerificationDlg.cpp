@@ -219,8 +219,34 @@ void CVerificationDlg::loadPredInfo()
 {
 }
 
+void CVerificationDlg::setDispData(FILE_TYPE fileType, COMPONENT cid)
+{
+	if (m_pFullBuffer == NULL)
+	{
+		m_pFullBuffer = (CImage*)LocalAlloc(LPTR, sizeof(CImage*));
+		m_pFullBuffer->Create(m_iWidth, m_iHeight, 24);
+	}
+	m_pImage[fileType][cid]->BitBlt(m_pFullBuffer->GetDC(), CPoint(0, 0));
+	m_pFullBuffer->ReleaseDC();
+}
+
 void CVerificationDlg::showPicture()
 {
+	if (m_pFullBuffer != NULL)
+	{
+		CRect destRect(0, 0, DISP_WIDTH, DISP_HEIGHT);
+		HDC hdc = m_pDispBuffer->GetDC();
+		m_pNullDispBuffer->BitBlt(hdc, CPoint(0, 0));
+		m_pNullDispBuffer->StretchBlt(hdc, destRect, m_visibleRect);
+		m_pDispBuffer->ReleaseDC();
+
+		CRect picRect(100, 100, 100 + DISP_WIDTH, 100 + DISP_HEIGHT);
+		CStatic* picCtrl = (CStatic*)GetDlgItem(IDC_STATIC_DISPLAY);
+		picCtrl->MoveWindow(picRect);
+		CDC* pDC = picCtrl->GetDC();
+		m_pDispBuffer->Draw(pDC->GetSafeHdc(), picRect);
+		ReleaseDC(pDC);
+	}
 }
 
 

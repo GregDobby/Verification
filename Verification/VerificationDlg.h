@@ -45,6 +45,7 @@ protected:
 	void loadPredInfo();
 
 	// œ‘ æÕº∆¨
+	void setDispData(FILE_TYPE, COMPONENT);
 	void showPicture();
 
 protected:
@@ -52,6 +53,7 @@ protected:
 	CString m_sFileName[FILE_NUM];
 
 	int m_iWidth, m_iHeight;
+
 	FILE_TYPE m_curType;
 	int m_curCid;
 
