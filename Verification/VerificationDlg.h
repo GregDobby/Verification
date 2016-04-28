@@ -70,4 +70,5 @@ public:
 
 	afx_msg void OnBnClickedButtonConfig();
 	afx_msg void OnBnClickedButtonConfigbf();
+	afx_msg void OnClose();
 };

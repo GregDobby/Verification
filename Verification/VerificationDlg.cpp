@@ -32,6 +32,7 @@ BEGIN_MESSAGE_MAP(CVerificationDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BUTTON_CONFIG, &CVerificationDlg::OnBnClickedButtonConfig)
 	ON_BN_CLICKED(IDC_BUTTON_CONFIGBF, &CVerificationDlg::OnBnClickedButtonConfigbf)
+	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 
@@ -54,15 +55,16 @@ BOOL CVerificationDlg::OnInitDialog()
 		}
 	}
 
-	CImage* m_pFullBuffer;
 
 	m_pDispBuffer = (CImage*)LocalAlloc(LPTR, sizeof(CImage));
-	m_pDispBuffer->Create(DISP_WIDTH, DISP_HEIGHT, 24);
+	m_pDispBuffer->Create(DISP_WIDTH, -DISP_HEIGHT, 24);
 
 	m_pNullDispBuffer = (CImage*)LocalAlloc(LPTR, sizeof(CImage));
-	m_pNullDispBuffer->Create(DISP_WIDTH, DISP_HEIGHT, 24);
+	m_pNullDispBuffer->Create(DISP_WIDTH, -DISP_HEIGHT, 24);
 
+	m_pFullBuffer = NULL;
 
+	m_visibleRect.SetRect(0, 0, DISP_WIDTH, DISP_HEIGHT);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -92,6 +94,8 @@ void CVerificationDlg::OnPaint()
 	}
 	else
 	{
+		//GetDlgItem(IDC_STATIC_DISPLAY)->Invalidate(TRUE);
+		showPicture();
 		CDialogEx::OnPaint();
 	}
 }
@@ -109,6 +113,7 @@ void CVerificationDlg::loadConfig()
 	CString sConfigPath; 
 	editConfig->GetWindowTextW(sConfigPath);
 	CStdioFile fConfig;
+
 	if (fConfig.Open(sConfigPath, CFile::modeRead))
 	{
 		// 读取图像尺寸
@@ -127,11 +132,15 @@ void CVerificationDlg::loadConfig()
 		loadRecoPic();
 		loadResiPic();
 		loadPredInfo();
+		m_curType = ORG;
+		m_curCid = 3;
+		setDispData(m_curType, COMPONENT(0));
 
-		Invalidate(TRUE);
+		this->Invalidate(TRUE);
 	}
 	else
 	{
+
 		MessageBox(L"配置文件打开失败！");
 	}
 }
@@ -150,8 +159,8 @@ void CVerificationDlg::loadOrgPic()
 			{
 				m_pImage[ORG][c] = (CImage*)LocalAlloc(LPTR, sizeof(CImage));
 				m_pImage[ORG][c]->Create(m_iWidth, -m_iHeight, 24);
-				pImageBits[c] = (BYTE*)m_pImage[ORG][c]->GetBits();
 			}
+			pImageBits[c] = (BYTE*)m_pImage[ORG][c]->GetBits();
 		}
 		// 读取文件信息
 		BYTE* buffer[C_NUM];
@@ -224,10 +233,26 @@ void CVerificationDlg::setDispData(FILE_TYPE fileType, COMPONENT cid)
 	if (m_pFullBuffer == NULL)
 	{
 		m_pFullBuffer = (CImage*)LocalAlloc(LPTR, sizeof(CImage*));
-		m_pFullBuffer->Create(m_iWidth, m_iHeight, 24);
+		m_pFullBuffer->Create(m_iWidth, -m_iHeight, 24);
 	}
-	m_pImage[fileType][cid]->BitBlt(m_pFullBuffer->GetDC(), CPoint(0, 0));
-	m_pFullBuffer->ReleaseDC();
+	//m_pImage[fileType][cid]->BitBlt(m_pFullBuffer->GetDC(),0,0);
+	//m_pFullBuffer->ReleaseDC();
+
+	// copy
+	BYTE* pDest = (BYTE*)m_pFullBuffer->GetBits();
+	BYTE* pSrc = (BYTE*)m_pImage[fileType][cid]->GetBits();
+	int pitch = m_pFullBuffer->GetPitch();
+	for (int y = 0; y < m_iHeight; y++)
+	{
+		for (int x = 0; x < m_iWidth; x++)
+		{
+			pDest[3 * x] = pSrc[3 * x];
+			pDest[3 * x+1] = pSrc[3 * x+1];
+			pDest[3 * x+2] = pSrc[3 * x+2];
+		}
+		pDest += pitch;
+		pSrc += pitch;
+	}
 }
 
 void CVerificationDlg::showPicture()
@@ -235,17 +260,19 @@ void CVerificationDlg::showPicture()
 	if (m_pFullBuffer != NULL)
 	{
 		CRect destRect(0, 0, DISP_WIDTH, DISP_HEIGHT);
+
 		HDC hdc = m_pDispBuffer->GetDC();
 		m_pNullDispBuffer->BitBlt(hdc, CPoint(0, 0));
-		m_pNullDispBuffer->StretchBlt(hdc, destRect, m_visibleRect);
+		m_pFullBuffer->StretchBlt(hdc, destRect, m_visibleRect);
 		m_pDispBuffer->ReleaseDC();
 
-		CRect picRect(100, 100, 100 + DISP_WIDTH, 100 + DISP_HEIGHT);
+		CRect picRect(200, 200, 200 + DISP_WIDTH, 200 + DISP_HEIGHT);
 		CStatic* picCtrl = (CStatic*)GetDlgItem(IDC_STATIC_DISPLAY);
-		picCtrl->MoveWindow(picRect);
-		CDC* pDC = picCtrl->GetDC();
-		m_pDispBuffer->Draw(pDC->GetSafeHdc(), picRect);
-		ReleaseDC(pDC);
+		picCtrl->MoveWindow(&picRect);
+
+		HBITMAP bitmap = m_pDispBuffer->Detach();
+		picCtrl->SetBitmap(bitmap);
+		m_pDispBuffer->Attach(bitmap);
 	}
 }
 
@@ -261,10 +288,44 @@ void CVerificationDlg::OnBnClickedButtonConfigbf()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	CString filter = L"文件 (*.*)|*.*||";	//文件过虑的类型
-	CFileDialog openFileDlg(TRUE);
+	CFileDialog openFileDlg(TRUE, NULL,NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,filter,this);
 	INT_PTR nResponse = openFileDlg.DoModal();
 	if (nResponse == IDOK) {
 		CEdit* editConfig = (CEdit*)GetDlgItem(IDC_EDIT_CONFIG);
 		editConfig->SetWindowTextW(openFileDlg.GetPathName());
 	}
+}
+
+
+void CVerificationDlg::OnClose()
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	for (int t = 0; t < FILE_NUM - 1; t++)
+	{
+		for (int c = 0; c <= C_NUM; c++)
+		{
+			if (m_pImage[t][c] != NULL)
+			{
+				LocalFree(m_pImage[t][c]);
+				m_pImage[t][c] = NULL;
+			}
+		}
+	}
+
+	if (m_pDispBuffer != NULL)
+	{
+		LocalFree(m_pDispBuffer);
+		m_pDispBuffer = NULL;
+	}
+	if (m_pNullDispBuffer != NULL)
+	{
+		LocalFree(m_pNullDispBuffer);
+		m_pNullDispBuffer = NULL;
+	}
+	if (m_pFullBuffer != NULL)
+	{
+		LocalFree(m_pFullBuffer);
+		m_pFullBuffer = NULL;
+	}
+	CDialogEx::OnClose();
 }
