@@ -263,6 +263,73 @@ void CVerificationDlg::loadOrgPic()
 
 void CVerificationDlg::loadRecoPic()
 {
+	CFile file;
+	if (file.Open(m_sFileName[ORG], CFile::modeRead))
+	{
+
+		// 读取文件信息
+		BYTE* buffer[C_NUM];
+		for (int c = 0; c < C_NUM; c++)
+		{
+			buffer[c] = (BYTE*)LocalAlloc(LPTR, m_iWidth* m_iHeight);
+			file.Read(buffer[c], m_iWidth*m_iHeight);
+		}
+
+		// 创建图像
+		BYTE* pImageBits[C_NUM + 1];
+		for (int c = 0; c <= C_NUM; c++)
+		{
+			//if (m_pImage[ORG][c] == NULL)
+			//{
+			//	m_pImage[ORG][c] = (CImage*)LocalAlloc(LPTR, sizeof(CImage*));
+			//	m_pImage[ORG][c]->Create(m_iWidth, -m_iHeight, 24);
+			//}
+			if (m_Image[ORG][c].IsNull())
+				m_Image[ORG][c].Create(m_iWidth, -m_iHeight, 24);
+			pImageBits[c] = (BYTE*)m_Image[ORG][c].GetBits();
+		}
+		// 赋值
+		int pitch = m_Image[ORG][0].GetPitch();
+		for (int y = 0; y < m_iHeight; y++)
+		{
+			for (int x = 0; x < m_iWidth; x++)
+			{
+				BYTE r, g, b;
+				int idx = y*m_iWidth + x;
+				r = buffer[C0][idx];
+				g = buffer[C1][idx];
+				b = buffer[C2][idx];
+				// c0
+				pImageBits[C0][3 * x] = pImageBits[C0][3 * x + 1] = pImageBits[C0][3 * x + 2] = r;
+
+				// c1
+				pImageBits[C1][3 * x] = pImageBits[C1][3 * x + 1] = pImageBits[C1][3 * x + 2] = g;
+
+				// c2
+				pImageBits[C2][3 * x] = pImageBits[C2][3 * x + 1] = pImageBits[C2][3 * x + 2] = b;
+
+				// all
+				pImageBits[C_NUM][3 * x] = b;
+				pImageBits[C_NUM][3 * x + 1] = g;
+				pImageBits[C_NUM][3 * x + 2] = r;
+			}
+			pImageBits[C0] += pitch;
+			pImageBits[C1] += pitch;
+			pImageBits[C2] += pitch;
+			pImageBits[C_NUM] += pitch;
+		}
+
+		// free
+		for (int c = 0; c < C_NUM; c++)
+		{
+			LocalFree(buffer[c]);
+		}
+
+	}
+	else
+	{
+		MessageBox(L"原始图像加载失败！");
+	}
 }
 
 void CVerificationDlg::loadResiPic()
