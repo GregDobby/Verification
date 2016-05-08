@@ -1,5 +1,0 @@
-1920 1080
-C:\Users\Zheng\Documents\Verification\Verification\sc_desktop_1920x1080_60_8bit_rgb.rgb
-C:\Users\Zheng\Documents\Verification\Verification\rec.yuv
-C:\Users\Zheng\Documents\Verification\Verification\resi.yuv
-C:\Users\Zheng\Documents\Verification\Verification\predinfo.txt

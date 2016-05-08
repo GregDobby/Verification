@@ -39,11 +39,11 @@ void CCTabPage::OnSize(UINT nType, int cx, int cy)
 {
 	CDialogEx::OnSize(nType, cx, cy);
 
-	CEdit* edit = (CEdit*)GetDlgItem(IDC_EDIT_TAB);
-	if (edit != NULL)
-	{
-		CRect rect;
-		GetClientRect(&rect);
-		edit->MoveWindow(&rect);
-	}
+	//CEdit* edit = (CEdit*)GetDlgItem(IDC_EDIT_TAB);
+	//if (edit != NULL)
+	//{
+	//	CRect rect;
+	//	GetClientRect(&rect);
+	//	edit->MoveWindow(&rect);
+	//}
 }

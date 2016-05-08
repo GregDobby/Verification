@@ -38,12 +38,12 @@ END_MESSAGE_MAP()
 
 void CConfigDlg::OnBnClickedButtonConfigbf()
 {
-	CString filter = L"文件 (*.*)|*.*||";	//文件过虑的类型
+	CString filter = "文件 (*.*)|*.*||";	//文件过虑的类型
 	CFileDialog openFileDlg(TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter, this);
 	INT_PTR nResponse = openFileDlg.DoModal();
 	if (nResponse == IDOK) {
 		CEdit* editConfig = (CEdit*)GetDlgItem(IDC_EDIT_CONFIG);
-		editConfig->SetWindowTextW(openFileDlg.GetPathName());
+		editConfig->SetWindowText(openFileDlg.GetPathName());
 		g_sConfigFile = openFileDlg.GetPathName();
 	}
 }

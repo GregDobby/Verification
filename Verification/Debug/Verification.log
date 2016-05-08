@@ -1,8 +1,1 @@
-﻿  VerificationDlg.cpp
-c:\users\zheng\documents\verification\verification\verificationdlg.cpp(438): warning C4244: “=”: 从“float”转换到“int”，可能丢失数据
-c:\users\zheng\documents\verification\verification\verificationdlg.cpp(439): warning C4244: “=”: 从“float”转换到“int”，可能丢失数据
-  正在生成代码...
-  正在跳过...(未检测到相关更改)
-  Verification.cpp
-  Verification.vcxproj -> C:\Users\Zheng\Documents\Verification\Debug\Verification.exe
-  Verification.vcxproj -> C:\Users\Zheng\Documents\Verification\Debug\Verification.pdb (Partial PDB)
+﻿
