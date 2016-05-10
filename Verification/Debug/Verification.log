@@ -1,1 +1,11 @@
-﻿
+﻿  stdafx.cpp
+  VerificationDlg.cpp
+e:\verification\verification\verificationdlg.cpp(587): warning C4244: “=”: 从“float”转换到“int”，可能丢失数据
+e:\verification\verification\verificationdlg.cpp(588): warning C4244: “=”: 从“float”转换到“int”，可能丢失数据
+  Verification.cpp
+  data.cpp
+  CTabPage.cpp
+  ConfigDlg.cpp
+  正在生成代码...
+  Verification.vcxproj -> E:\Verification\Debug\Verification.exe
+  Verification.vcxproj -> E:\Verification\Debug\Verification.pdb (Partial PDB)
