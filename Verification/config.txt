@@ -1,5 +1,5 @@
 1920 1080
-C:\Users\Zheng\Documents\Verification\Verification\sc_desktop_1920x1080_60_8bit_rgb.rgb
-efg
-hig
-ksdf
+E:\Verification\Verification\sc_desktop_1920x1080_60_8bit_rgb.rgb
+E:\Verification\Verification\rec.yuv
+E:\Verification\Verification\resi_original.yuv
+E:\Verification\Verification\predInfo\
